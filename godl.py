@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 from langchain_groq import ChatGroq
+import os
 
 # Initialize the chatbot
 llm = ChatGroq(
@@ -13,10 +14,18 @@ llm = ChatGroq(
 if "chat_history" not in st.session_state:
     st.session_state["chat_history"] = []
 
+# File to log user questions
+log_file = "user_questions.log"
+
+def log_question(question):
+    """Log user questions to a file."""
+    with open(log_file, "a") as f:
+        f.write(question + "\n")
+
 # Function to search the web using Google Custom Search API
 def search_web(query):
     api_key = "AIzaSyAHRg3xoX-_j-duSPQSSfzLnghFODdQMhw"
-    cx = "80102c50a86d74d76" 
+    cx = "80102c50a86d74d76"
     url = "https://www.googleapis.com/customsearch/v1"
     params = {
         "key": api_key,
@@ -43,6 +52,9 @@ def extract_answer_from_search(results):
 def handle_input():
     user_input = st.session_state.user_input  # Get user input from session state
     if user_input:
+        # Log the user question
+        log_question(user_input)
+        
         # Check if the query is time-sensitive (Virat Kohli and 2024)
         if "virat kohli" in user_input.lower() and "century" in user_input.lower() and "2024" in user_input.lower():
             st.session_state.chat_history.append({"user": user_input, "bot": "Searching for the latest information..."})
@@ -61,8 +73,8 @@ def handle_input():
 
 
 # Streamlit UI setup
-st.title("Krishna ki Bandi Randi h")
-st.write("Heyyy guys , mene krishna ki bandi ko 5 baar choda , and ek aada question phuch lo isse chatbot se . pls ")
+st.title("ChatBot")
+st.write("Heyyy guys!")
 
 # Input field with an on_change event
 st.text_input("Enter your question:", key="user_input", placeholder="Type your message here...", on_change=handle_input)
