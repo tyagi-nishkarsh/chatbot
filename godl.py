@@ -61,8 +61,8 @@ def handle_input():
 
 
 # Streamlit UI setup
-st.title("ChatBot")
-st.write("Heyyy guys!")
+st.title("Krishna ki Bandi Randi h")
+st.write("Heyyy guys , mene krishna ki bandi ko 5 baar choda , and ek aada question phuch lo isse chatbot se . pls ")
 
 # Input field with an on_change event
 st.text_input("Enter your question:", key="user_input", placeholder="Type your message here...", on_change=handle_input)
