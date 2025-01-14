@@ -55,61 +55,77 @@ def handle_input():
         # Log the user question
         log_question(user_input)
         
+        # Append user input to chat history
+        st.session_state.chat_history.append({"role": "user", "content": user_input})
+        
+        # Construct conversation history to send to the model
+        conversation_history = "\n".join(
+            f"{msg['role'].capitalize()}: {msg['content']}" 
+            for msg in st.session_state.chat_history
+        )
+        
         # Check if the query is time-sensitive (Virat Kohli and 2024)
         if "virat kohli" in user_input.lower() and "century" in user_input.lower() and "2024" in user_input.lower():
-            st.session_state.chat_history.append({"user": user_input, "bot": "Searching for the latest information..."})
+            st.session_state.chat_history.append(
+                {"role": "bot", "content": "Searching for the latest information..."}
+            )
             search_results = search_web(user_input)
             chatbot_response = extract_answer_from_search(search_results)
         else:
             # Process the query with the chatbot model
-            response = llm.invoke(user_input)
+            response = llm.invoke(conversation_history)
             chatbot_response = response.content
         
-        # Add the question and response to the chat history
-        st.session_state.chat_history.append({"user": user_input, "bot": chatbot_response})
+        # Add the bot's response to the chat history
+        st.session_state.chat_history.append({"role": "bot", "content": chatbot_response})
 
         # Clear the input box by resetting session state
         st.session_state.user_input = ""
-
 
 # Streamlit UI setup
 st.title("ChatBot")
 st.write("Heyyy guys!")
 
-# Input field with an on_change event
-st.text_input("Enter your question:", key="user_input", placeholder="Type your message here...", on_change=handle_input)
+# Multi-line input field with a submit button
+st.text_area(
+    "Enter your question:",
+    key="user_input",
+    placeholder="Type your message here...",
+    on_change=handle_input,
+    height=100
+)
 
 # Display the chat history (latest message at the bottom)
 if st.session_state.chat_history:
     for chat in st.session_state.chat_history:
-        # User input
-        st.markdown(
-            f"""
-            <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
-                <div style="background-color: black; color: white; padding: 10px; border-radius: 10px; max-width: 70%; text-align: right;">
-                    <strong>You:</strong> {chat['user']}
+        if chat["role"] == "user":
+            st.markdown(
+                f"""
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                    <div style="background-color: black; color: white; padding: 10px; border-radius: 10px; max-width: 70%; text-align: right;">
+                        <strong>You:</strong> {chat['content']}
+                    </div>
                 </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        # Bot response
-        st.markdown(
-            f"""
-            <div style="display: flex; justify-content: flex-start; margin-bottom: 10px;">
-                <div style="background-color: black; color: white; padding: 10px; border-radius: 10px; max-width: 70%;">
-                    <strong>Bot:</strong> {chat['bot']}
+                """,
+                unsafe_allow_html=True,
+            )
+        elif chat["role"] == "bot":
+            st.markdown(
+                f"""
+                <div style="display: flex; justify-content: flex-start; margin-bottom: 10px;">
+                    <div style="background-color: black; color: white; padding: 10px; border-radius: 10px; max-width: 70%;">
+                        <strong>Bot:</strong> {chat['content']}
+                    </div>
                 </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+                """,
+                unsafe_allow_html=True,
+            )
 
 # Add CSS to fix the input box at the bottom
 st.markdown(
     """
     <style>
-    .stTextInput {
+    textarea.stTextArea {
         position: fixed;
         bottom: 20px;
         left: 10%;
