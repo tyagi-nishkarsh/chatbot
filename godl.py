@@ -79,7 +79,7 @@ def handle_input():
         # Add the bot's response to the chat history
         st.session_state.chat_history.append({"role": "bot", "content": chatbot_response})
 
-        # Clear the input box by resetting session state
+        # Clear the input box by resetting session state (but not the chat history)
         st.session_state.user_input = ""
 
 # Streamlit UI setup
